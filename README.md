@@ -1,0 +1,1 @@
+# mangakalot-web-scraper
