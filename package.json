@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/CodeWritingCow/mangakalot-web-scraper/issues"
   },
-  "homepage": "https://github.com/CodeWritingCow/mangakalot-web-scraper#readme"
+  "homepage": "https://github.com/CodeWritingCow/mangakalot-web-scraper#readme",
+  "dependencies": {
+    "puppeteer": "^19.7.5"
+  }
 }
