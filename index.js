@@ -6,52 +6,86 @@ const puppeteer = require('puppeteer');
 const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
 
 // TODO: Replace testLink with URL provided by user in CLI
-async function parseMangakalotComics(url = testLink) {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+(async function parseMangakalotComics(url = testLink) {
+    try {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
 
-    // Mangakalot currently renders comic images inside div.container-chapter-reader
-    await page.goto(url, { waitUntil: 'networkidle2' });
-    await page.waitForSelector('div.container-chapter-reader', {
-        timeout: 100
-    });
-
-    let imageSrcs = await page.$$eval(
-        '.container-chapter-reader > img',
-        (e) => {
-            return e.map((img) => img.src);
-        }
-    );
-
-    // TODO: Save each image as jpg file
-    imageSrcs.forEach(async (src) => {
         page.setExtraHTTPHeaders({
-            'user-agent':
-                'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
-            'upgrade-insecure-requests': '1',
-            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept-language': 'en-US,en;q=0.9,en;q=0.8',
             Referer: 'https://mangakakalot.com/'
         });
-        await page.waitForTimeout((Math.floor(Math.random() * 12) + 5) * 1000);
 
-        const imagefileDL = await page.goto(src);
-        fs.writeFile(
-            './imgs/' + src.replace(/^.*[\\\/]/, ''),
-            await imagefileDL.buffer(),
-            function (err) {
-                if (err) {
-                    return console.error(err);
-                } else {
-                    console.log('File saved');
-                }
+        const allImgResponses = {};
+        page.on('response', (response) => {
+            if (response.request().resourceType() === 'image') {
+                allImgResponses[response.url()] = response;
             }
+        });
+
+        // Mangakalot currently renders comic images inside div.container-chapter-reader
+        await page.goto(url); //, { waitUntil: 'networkidle2' }
+        await page.waitForSelector('div.container-chapter-reader', {
+            timeout: 100
+        });
+
+        // This code block appears related to the "Target closed" error mentioned below.
+        // Refactoring it to use page.evaluate() and Array.from appears to help fix the error.
+
+        // let imageSrcs = await page.$$eval(
+        //     'div.container-chapter-reader > img',
+        //     (e) => {
+        //         return e.map((img) => img.src);
+        //     }
+        // );
+
+        const imageSrcs = await page.evaluate(() =>
+            Array.from(
+                document.querySelectorAll('div.container-chapter-reader img'),
+                ({ src }) => src
+            )
         );
-        // console.log(src);
-    });
 
-    await browser.close();
-}
+        // Create /images directory if it doesn't exist
+        fs.mkdir(path.join(__dirname, 'images'), { recursive: true }, (err) => {
+            if (err) {
+                return console.error(err);
+            } else {
+                console.log('Directory created!');
+            }
+        });
 
-parseMangakalotComics();
+        /*
+        // The await keyword in the code block below gives this error:
+        // "'await' expressions are only allowed within async functions and at the top levels of modules"
+
+        // Prepending the "(src) =>" callback inside forEach with 'async' fixes the above error.
+        // However, this results in a new error:
+        "Protocol error (Network.getResponseBody): Target closed."
+    
+        imageSrcs.forEach((src) => {
+            fs.writeFileSync(
+                'images/' + src.replace(/^.*[\\\/]/, ''),
+                await allImgResponses[src].buffer()
+            );
+        });
+    */
+
+        for (const src of imageSrcs) {
+            fs.writeFile(
+                'images/' + src.replace(/^.*[\\\/]/, ''),
+                await allImgResponses[src].buffer(),
+                function (err) {
+                    if (err) {
+                        return console.error(err);
+                    } else {
+                        console.log('File saved!');
+                    }
+                }
+            );
+        }
+
+        await browser.close();
+    } catch (err) {
+        console.error(err);
+    }
+})();
