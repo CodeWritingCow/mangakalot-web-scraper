@@ -2,11 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
+const getUserInput = require('./getUserInput');
+
 // TODO: Remove hardcoded URL
 const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
 
 // TODO: Replace testLink with URL provided by user in CLI
-(async function parseMangakalotComics(url = testLink) {
+async function parseMangakalotComics(url = testLink) {
     try {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -45,6 +47,9 @@ const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
             )
         );
 
+        // TODO: Create subfolders for manga name followed by chapter number
+        // /images/manga_name/chapter_number
+
         // Create /images directory if it doesn't exist
         fs.mkdir(path.join(__dirname, 'images'), { recursive: true }, (err) => {
             if (err) {
@@ -70,6 +75,8 @@ const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
         });
     */
 
+        // TODO: Save images inside manga chapter subfolder
+        // like this: /images/manga_name/chapter_number
         for (const src of imageSrcs) {
             fs.writeFile(
                 'images/' + src.replace(/^.*[\\\/]/, ''),
@@ -78,6 +85,7 @@ const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
                     if (err) {
                         return console.error(err);
                     } else {
+                        // TODO: Replace 'File' with actual file name
                         console.log('File saved!');
                     }
                 }
@@ -88,4 +96,14 @@ const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
     } catch (err) {
         console.error(err);
     }
-})();
+}
+
+getUserInput()
+    .then((mangaUrl) => {
+        return parseMangakalotComics(mangaUrl);
+    })
+    .catch((err) => console.error(err))
+    .finally(() => {
+        console.log('Exiting Mangakalot Web scraper!');
+        process.exit(0);
+    });

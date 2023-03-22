@@ -19,13 +19,10 @@ const getUserInput = async () => {
     console.log('(ex. https://mangakakalot.com/chapter/shiji/chapter_6)\n');
 
     const mangaUrl = await ask('Enter URL: ');
-
-    console.log(mangaUrl);
+    // TODO: Add logic for validating mangaUrl as a Mangakalot URL 
 
     rl.close;
-
-    console.log('Exiting Mangakalot Web scraper!');
-    process.exit(0);
+    return mangaUrl;
 };
 
 rl.on('close', () => {
@@ -33,9 +30,4 @@ rl.on('close', () => {
     process.exit(0);
 });
 
-getUserInput();
-
-// TODO: Export getUserInput to index.js
-// or move its code into index.js
-
-// module.exports = getUserInput;
+module.exports = getUserInput;
