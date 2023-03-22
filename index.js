@@ -30,16 +30,6 @@ async function parseMangakalotComics(url = testLink) {
             timeout: 100
         });
 
-        // This code block appears related to the "Target closed" error mentioned below.
-        // Refactoring it to use page.evaluate() and Array.from appears to help fix the error.
-
-        // let imageSrcs = await page.$$eval(
-        //     'div.container-chapter-reader > img',
-        //     (e) => {
-        //         return e.map((img) => img.src);
-        //     }
-        // );
-
         const imageSrcs = await page.evaluate(() =>
             Array.from(
                 document.querySelectorAll('div.container-chapter-reader img'),
@@ -58,22 +48,6 @@ async function parseMangakalotComics(url = testLink) {
                 console.log('Directory created!');
             }
         });
-
-        /*
-        // The await keyword in the code block below gives this error:
-        // "'await' expressions are only allowed within async functions and at the top levels of modules"
-
-        // Prepending the "(src) =>" callback inside forEach with 'async' fixes the above error.
-        // However, this results in a new error:
-        "Protocol error (Network.getResponseBody): Target closed."
-    
-        imageSrcs.forEach((src) => {
-            fs.writeFileSync(
-                'images/' + src.replace(/^.*[\\\/]/, ''),
-                await allImgResponses[src].buffer()
-            );
-        });
-    */
 
         // TODO: Save images inside manga chapter subfolder
         // like this: /images/manga_name/chapter_number
