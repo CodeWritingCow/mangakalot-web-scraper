@@ -4,11 +4,7 @@ const puppeteer = require('puppeteer');
 
 const getUserInput = require('./getUserInput');
 
-// TODO: Remove hardcoded URL
-const testLink = 'https://mangakakalot.com/chapter/shiji/chapter_1';
-
-// TODO: Replace testLink with URL provided by user in CLI
-async function parseMangakalotComics(url = testLink) {
+async function parseMangakalotComics(url) {
     try {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -37,30 +33,38 @@ async function parseMangakalotComics(url = testLink) {
             )
         );
 
-        // TODO: Create subfolders for manga name followed by chapter number
-        // /images/manga_name/chapter_number
+        const urlParts = url.split('/');
+        const mangaName = urlParts[url.split('/').indexOf('chapter') + 1];
+        const mangaChapter = urlParts.length - 1;
 
-        // Create /images directory if it doesn't exist
-        fs.mkdir(path.join(__dirname, 'images'), { recursive: true }, (err) => {
-            if (err) {
-                return console.error(err);
-            } else {
-                console.log('Directory created!');
+        // Create /images/manga_name/chapter_number directory if it doesn't exist
+        fs.mkdir(
+            path.join(__dirname, 'images', mangaName, urlParts[mangaChapter]),
+            { recursive: true },
+            (err) => {
+                if (err) {
+                    return console.error(err);
+                } else {
+                    console.log(
+                        `Creating directory ${__dirname}/images/${mangaName}/${urlParts[mangaChapter]}/`
+                    );
+                }
             }
-        });
+        );
 
-        // TODO: Save images inside manga chapter subfolder
-        // like this: /images/manga_name/chapter_number
+        // Save images inside manga chapter subfolder
         for (const src of imageSrcs) {
+            const imageFileName = src.replace(/^.*[\\\/]/, '');
             fs.writeFile(
-                'images/' + src.replace(/^.*[\\\/]/, ''),
+                `images/${mangaName}/${urlParts[mangaChapter]}/${imageFileName}`,
                 await allImgResponses[src].buffer(),
                 function (err) {
                     if (err) {
                         return console.error(err);
                     } else {
-                        // TODO: Replace 'File' with actual file name
-                        console.log('File saved!');
+                        console.log(
+                            `Saving images/${mangaName}/${urlParts[mangaChapter]}/${imageFileName}`
+                        );
                     }
                 }
             );
