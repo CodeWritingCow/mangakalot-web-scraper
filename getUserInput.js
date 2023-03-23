@@ -14,7 +14,9 @@ const ask = (query) => {
 };
 
 const getUserInput = async () => {
+    console.log('\n');
     console.log('Welcome to Mangakalot Web scraper!');
+    console.log('\n');
     console.log('Enter URL of of manga chapter to download');
     console.log('(ex. https://mangakakalot.com/chapter/shiji/chapter_6)\n');
 
@@ -26,7 +28,9 @@ const getUserInput = async () => {
 };
 
 rl.on('close', () => {
+    console.log('\n');
     console.log('Exiting Mangakalot Web scraper!');
+    console.log('\n');
     process.exit(0);
 });
 
