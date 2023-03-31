@@ -37,16 +37,38 @@ async function parseMangakalotComics(url) {
         const mangaName = urlParts[url.split('/').indexOf('chapter') + 1];
         const mangaChapter = urlParts.length - 1;
 
+        // if user runs `node index.js`
+        // cwdPath is Users/USER_NAME/Documents/GitHub/mangakalot-web-scraper/images/shiji/chapter_1/
+        // executablePath is /Users/USER_NAME/.nvm/versions/node/v16.15.0/bin/images/shiji/chapter_1
+
+        // if user runs `dist/index-macos`
+        // cwdPath is /snapshot/dist/images/shiji/chapter_1/        
+        // executablePath is /Users/USER_NAME/Documents/GitHub/mangakalot-web-scraper/dist/images/shiji/chapter_1
+        const executablePath = path.join(path.dirname(process.execPath), 'images', mangaName, urlParts[mangaChapter]);
+        const cwdPath = path.join(process.cwd(), 'images', mangaName, urlParts[mangaChapter]);
+        const saveFolderPath = cwdPath.includes('snapshot') ? executablePath : cwdPath;
+
+        console.log('cwdPath', cwdPath);
+        console.log('executablePath', executablePath);
+        console.log('saveFolderPath', saveFolderPath);
+
+        // console.log('process', process);
+        // console.log('process.pkg', process.pkg);
+        // console.log('process.cwd()', process.cwd());
+        // console.log('__dirname', __dirname);
+        // console.log('process.execPath', process.execPath);
+        // console.log('path.dirname(process.execPath)', path.dirname(process.execPath));
+
         // Create /images/manga_name/chapter_number directory if it doesn't exist
         fs.mkdir(
-            path.join(__dirname, 'images', mangaName, urlParts[mangaChapter]),
+            saveFolderPath,
             { recursive: true },
             (err) => {
                 if (err) {
                     return console.error(err);
                 } else {
                     console.log(
-                        `Creating directory ${__dirname}/images/${mangaName}/${urlParts[mangaChapter]}/`
+                        `Creating directory ${saveFolderPath}/`
                     );
                 }
             }
@@ -56,14 +78,14 @@ async function parseMangakalotComics(url) {
         for (const src of imageSrcs) {
             const imageFileName = src.replace(/^.*[\\\/]/, '');
             fs.writeFile(
-                `images/${mangaName}/${urlParts[mangaChapter]}/${imageFileName}`,
+                `${saveFolderPath}/${imageFileName}`,
                 await allImgResponses[src].buffer(),
                 function (err) {
                     if (err) {
                         return console.error(err);
                     } else {
                         console.log(
-                            `Saving images/${mangaName}/${urlParts[mangaChapter]}/${imageFileName}`
+                            `Saving images/${saveFolderPath}/${imageFileName}`
                         );
                     }
                 }
