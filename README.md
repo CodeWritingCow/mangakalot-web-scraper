@@ -8,6 +8,7 @@ A Node.js command-line application for downloading manga images from Mangakalot.
 
 #### Getting Started
 - Run `node index.js` in terminal
+  - (Mac users only) As an alternative, run the application as an [executable](https://github.com/CodeWritingCow/mangakalot-web-scraper/releases/download/v1.0.0/index-macos).
 - When prompted, enter URL of a manga's chapter to download. The URL should follow this format: https://mangakakalot.com/chapter/MANGA_NAME/CHAPTER_NUMBER (For example, 'https://mangakakalot.com/chapter/shiji/chapter_6).
 
 #### Key Dependencies
