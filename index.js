@@ -38,9 +38,21 @@ async function parseMangakalotComics(url) {
         const mangaChapter = urlParts.length - 1;
 
         // if user runs executable, use executablePath. Otherwise, use cwdPath.
-        const executablePath = path.join(path.dirname(process.execPath), 'images', mangaName, urlParts[mangaChapter]);
-        const cwdPath = path.join(process.cwd(), 'images', mangaName, urlParts[mangaChapter]);
-        const saveFolderPath = cwdPath.includes('snapshot') ? executablePath : cwdPath;
+        const executablePath = path.join(
+            path.dirname(process.execPath),
+            'images',
+            mangaName,
+            urlParts[mangaChapter]
+        );
+        const cwdPath = path.join(
+            process.cwd(),
+            'images',
+            mangaName,
+            urlParts[mangaChapter]
+        );
+        const saveFolderPath = cwdPath.includes('snapshot')
+            ? executablePath
+            : cwdPath;
 
         // Create /images/manga_name/chapter_number directory if it doesn't exist
         fs.mkdir(saveFolderPath, { recursive: true }, (err) => {
@@ -54,19 +66,28 @@ async function parseMangakalotComics(url) {
         // Save images inside manga chapter subfolder
         for (const src of imageSrcs) {
             const imageFileName = src.replace(/^.*[\\\/]/, '');
-            fs.writeFile(
-                `${saveFolderPath}/${imageFileName}`,
-                await allImgResponses[src].buffer(),
-                function (err) {
-                    if (err) {
-                        return console.error(err);
-                    } else {
-                        console.log(
-                            `Saving images/${saveFolderPath}/${imageFileName}`
-                        );
+            // console.log('src', src);
+
+            if (isImageFile(imageFileName)) {
+                // console.log('imageFileName', imageFileName);
+                fs.writeFile(
+                    `${saveFolderPath}/${imageFileName}`,
+                    await allImgResponses[src].buffer(),
+                    function (err) {
+                        if (err) {
+                            return console.error(err);
+                        } else {
+                            console.log(
+                                `Saving images/${saveFolderPath}/${imageFileName}`
+                            );
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                console.log(`${imageFileName} is not an image file!!!`);
+                // console.error('imageFileName', imageFileName);
+            }
+            console.log('==================');
         }
 
         await browser.close();
@@ -84,3 +105,10 @@ getUserInput()
         console.log('Exiting Mangakalot Web scraper!');
         process.exit(0);
     });
+
+function isImageFile(fileName) {
+    const splitFileName = fileName.split('.');
+    const fileExtension = splitFileName[splitFileName.length - 1];
+
+    return ['gif', 'jpg', 'jpeg', 'png'].includes(fileExtension);
+}
