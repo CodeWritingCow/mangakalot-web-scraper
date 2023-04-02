@@ -66,10 +66,8 @@ async function parseMangakalotComics(url) {
         // Save images inside manga chapter subfolder
         for (const src of imageSrcs) {
             const imageFileName = src.replace(/^.*[\\\/]/, '');
-            // console.log('src', src);
 
             if (isImageFile(imageFileName)) {
-                // console.log('imageFileName', imageFileName);
                 fs.writeFile(
                     `${saveFolderPath}/${imageFileName}`,
                     await allImgResponses[src].buffer(),
@@ -83,11 +81,7 @@ async function parseMangakalotComics(url) {
                         }
                     }
                 );
-            } else {
-                console.log(`${imageFileName} is not an image file!!!`);
-                // console.error('imageFileName', imageFileName);
             }
-            console.log('==================');
         }
 
         await browser.close();
