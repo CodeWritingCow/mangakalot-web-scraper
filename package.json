@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build" : "npx @vercel/ncc build index.js -o dist && npx pkg dist/index.js --out-path dist --public"
+    "build" : "npx @vercel/ncc build index.js -m -o dist && npx pkg dist/index.js --out-path dist --public --compress GZip"
   },
   "repository": {
     "type": "git",
